@@ -61,9 +61,9 @@ run_with_sudo_if_needed "pipx inject --include-apps ansible argcomplete"
 echo "Installing git and curl..."
 run_with_sudo_if_needed "apt install -y git curl"
 
-# Run ansible-pull command
-echo "Running ansible-pull command..."
-run_with_sudo_if_needed "ansible-pull -U https://github.com/aviellg/ansible-pull-setup.git"
+# Run ansible-pull command without sudo
+echo "Running ansible-pull command without sudo..."
+ansible-pull -U https://github.com/aviellg/ansible-pull-setup.git
 
 # Reload shell
 echo "Reloading the shell..."
