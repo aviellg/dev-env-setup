@@ -61,6 +61,10 @@ run_with_sudo_if_needed "pipx inject --include-apps ansible argcomplete"
 echo "Installing git and curl..."
 run_with_sudo_if_needed "apt install -y git curl"
 
+# Create SSH key for user autoadmin
+echo "Creating SSH key for user autoadmin..."
+run_with_sudo_if_needed "su - autoadmin -c 'ssh-keygen -t rsa -b 4096 -N \"\" -f ~/.ssh/id_rsa'"
+
 # Run ansible-pull command without sudo
 echo "Running ansible-pull command without sudo..."
 ansible-pull -U https://github.com/aviellg/ansible-pull-setup.git
@@ -70,7 +74,6 @@ echo "Reloading the shell..."
 run_with_sudo_if_needed "exec $SHELL"
 
 echo "Installation completed!"
-
 ```
 
    This script will install necessary packages and configure the `autoadmin` user.
