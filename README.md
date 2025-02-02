@@ -36,62 +36,44 @@ run_with_sudo_if_needed() {
   fi
 }
 
-# Function to perform the tasks
-perform_tasks() {
-  run_with_sudo_if_needed "apt-get update"
-  run_with_sudo_if_needed "apt-get upgrade -y"
-  run_with_sudo_if_needed "apt-get install -y ansible git curl"
-  run_with_sudo_if_needed "ansible-pull -U https://github.com/aviellg/ansible-pull-setup.git"
-}
+# Remove Ansible if installed via apt
+echo "Removing Ansible installed via apt..."
+run_with_sudo_if_needed "apt remove -y ansible"
 
-perform_tasks
+# Install pipx using apt
+echo "Installing pipx..."
+run_with_sudo_if_needed "apt update"
+run_with_sudo_if_needed "apt install -y pipx"
 
-exit 0
+# Ensure pipx is in the PATH
+echo "Ensuring pipx is in the PATH..."
+run_with_sudo_if_needed "pipx ensurepath"
+
+# Install ansible using pipx
+echo "Installing Ansible with pipx..."
+run_with_sudo_if_needed "pipx install --include-deps ansible"
+
+# Inject argcomplete into ansible
+echo "Injecting argcomplete into Ansible..."
+run_with_sudo_if_needed "pipx inject --include-apps ansible argcomplete"
+
+# Install git and curl
+echo "Installing git and curl..."
+run_with_sudo_if_needed "apt install -y git curl"
+
+# Run ansible-pull command
+echo "Running ansible-pull command..."
+run_with_sudo_if_needed "ansible-pull -U https://github.com/aviellg/ansible-pull-setup.git"
+
+# Reload shell
+echo "Reloading the shell..."
+run_with_sudo_if_needed "exec $SHELL"
+
+echo "Installation completed!"
+
 ```
 
    This script will install necessary packages and configure the `autoadmin` user.
-
-### 3. Install Ansible using pipx
-1. **Save the following bash script to a file (e.g., `install_ansible_with_pipx.sh`)**:
-    ```bash
-    #!/bin/bash
-
-    # Remove Ansible if installed via apt
-    echo "Removing Ansible installed via apt..."
-    sudo apt remove -y ansible
-
-    # Install pipx using apt
-    echo "Installing pipx..."
-    sudo apt update
-    sudo apt install -y pipx
-
-    # Ensure pipx is in the PATH
-    echo "Ensuring pipx is in the PATH..."
-    pipx ensurepath
-
-    # Install ansible using pipx
-    echo "Installing Ansible with pipx..."
-    pipx install --include-deps ansible
-
-    # Inject argcomplete into ansible
-    echo "Injecting argcomplete into Ansible..."
-    pipx inject --include-apps ansible argcomplete
-
-    # Reload shell
-    echo "Reloading the shell..."
-    exec $SHELL
-
-    echo "Installation completed!"
-    ```
-2. **Make the script executable**:
-    ```sh
-    chmod +x install_ansible_with_pipx.sh
-    ```
-
-3. **Run the script**:
-    ```sh
-    ./install_ansible_with_pipx.sh
-    ```
 
 ### 4. Verify Setup
 - Ensure necessary packages are installed.
