@@ -23,13 +23,18 @@ This README provides a step-by-step guide to set up a development environment in
 ```bash 
 #!/bin/bash
 
-# Function to check if a command needs to be run with sudo
+# Function to run apt commands with sudo
 run_with_sudo_if_needed() {
   local command="$@"
-  
-  if [ "$EUID" -ne 0 ]; then
-    echo "Running with sudo: $command"
-    sudo bash -c "$command"
+
+  if [[ "$command" == apt* ]]; then
+    if [ "$EUID" -ne 0 ]; then
+      echo "Running with sudo: $command"
+      sudo bash -c "$command"
+    else
+      echo "Running without sudo: $command"
+      bash -c "$command"
+    fi
   else
     echo "Running without sudo: $command"
     bash -c "$command"
@@ -40,30 +45,22 @@ run_with_sudo_if_needed() {
 echo "Removing Ansible installed via apt..."
 run_with_sudo_if_needed "apt remove -y ansible"
 
-# Install pipx using apt
-echo "Installing pipx..."
+# Install pipx, git, and curl using apt
+echo "Installing pipx, git, and curl..."
 run_with_sudo_if_needed "apt update"
-run_with_sudo_if_needed "apt install -y pipx"
+run_with_sudo_if_needed "apt install -y pipx git curl"
 
 # Ensure pipx is in the PATH
 echo "Ensuring pipx is in the PATH..."
-run_with_sudo_if_needed "pipx ensurepath"
+pipx ensurepath
 
-# Install ansible using pipx
+# Install Ansible using pipx
 echo "Installing Ansible with pipx..."
-run_with_sudo_if_needed "pipx install --include-deps ansible"
+pipx install --include-deps ansible
 
-# Inject argcomplete into ansible
+# Inject argcomplete into Ansible
 echo "Injecting argcomplete into Ansible..."
-run_with_sudo_if_needed "pipx inject --include-apps ansible argcomplete"
-
-# Install git and curl
-echo "Installing git and curl..."
-run_with_sudo_if_needed "apt install -y git curl"
-
-# Create SSH key for user autoadmin
-echo "Creating SSH key for user autoadmin..."
-run_with_sudo_if_needed "su - autoadmin -c 'ssh-keygen -t rsa -b 4096 -N \"\" -f ~/.ssh/id_rsa'"
+pipx inject --include-apps ansible argcomplete
 
 # Run ansible-pull command without sudo
 echo "Running ansible-pull command without sudo..."
@@ -71,9 +68,10 @@ ansible-pull -U https://github.com/aviellg/ansible-pull-setup.git
 
 # Reload shell
 echo "Reloading the shell..."
-run_with_sudo_if_needed "exec $SHELL"
+exec $SHELL
 
 echo "Installation completed!"
+
 ```
 
    This script will install necessary packages and configure the `autoadmin` user.
